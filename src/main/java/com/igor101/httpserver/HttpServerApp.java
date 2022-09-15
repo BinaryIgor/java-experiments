@@ -4,8 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.Executors;
 
 public class HttpServerApp {
 
@@ -15,36 +17,20 @@ public class HttpServerApp {
             HTTP_HEAD_BODY_SEPARATOR.getBytes(StandardCharsets.US_ASCII).length;
     private static final int DEFAULT_PACKET_SIZE = 10_000;
     private static final String CONTENT_LENGTH_HEADER = "content-length";
+    private static final String CONNECTION_HEADER = "connection";
+    private static final String CONNECTION_KEEP_ALIVE = "keep-alive";
 
     public static void main(String[] args) throws Exception {
         var serverSocket = new ServerSocket(8080);
 
+        var executor = Executors.newFixedThreadPool(10);
+
         while (true) {
             var connection = serverSocket.accept();
 
-            var requestOpt = readRequest(connection);
-            if (requestOpt.isEmpty()) {
-                continue;
-            }
-            printRequest(requestOpt.get());
+            connection.setSoTimeout(10_000);
 
-            try (var os = connection.getOutputStream()) {
-                var body = """
-                        {
-                            "id": 1
-                        }
-                        """;
-
-                var response = """
-                        HTTP/1.1 200 OK
-                        Content-Type: application/json
-                        Content-Length: %d
-                                                
-                        %s
-                        """.formatted(body.getBytes(StandardCharsets.UTF_8).length, body);
-
-                os.write(response.getBytes(StandardCharsets.UTF_8));
-            }
+            executor.execute(() -> handleRequest(connection));
         }
     }
 
@@ -150,6 +136,64 @@ public class HttpServerApp {
         }
 
         return result.toByteArray();
+    }
+
+    private static void handleRequest(Socket connection) {
+        try {
+            var requestOpt = readRequest(connection);
+            if (requestOpt.isEmpty()) {
+                closeConnection(connection);
+                return;
+            }
+
+            var request = requestOpt.get();
+            printRequest(request);
+
+            var os = connection.getOutputStream();
+            var body = """
+                    {
+                        "id": 1
+                    }
+                    """;
+
+            var response = """
+                    HTTP/1.1 200 OK
+                    Content-Type: application/json
+                    Content-Length: %d
+                                            
+                    %s
+                    """.formatted(body.getBytes(StandardCharsets.UTF_8).length, body);
+
+            os.write(response.getBytes(StandardCharsets.UTF_8));
+
+            if (shouldReuseConnection(request.headers)) {
+                handleRequest(connection);
+            } else {
+                closeConnection(connection);
+            }
+        } catch (SocketTimeoutException e) {
+            System.out.println("Socket timeout, closing");
+            closeConnection(connection);
+        } catch (Exception e) {
+            System.out.println("Problem while handling connection");
+            e.printStackTrace();
+            closeConnection(connection);
+        }
+    }
+
+    private static void closeConnection(Socket connection) {
+        try {
+            System.out.println("Closing connection...");
+            connection.close();
+        } catch (Exception ignored) {
+
+        }
+    }
+
+    private static boolean shouldReuseConnection(Map<String, List<String>> headers) {
+        return headers.getOrDefault(CONNECTION_HEADER, List.of(CONNECTION_KEEP_ALIVE))
+                .get(0)
+                .equals(CONNECTION_KEEP_ALIVE);
     }
 
     private static void printRequest(HttpReq req) {
