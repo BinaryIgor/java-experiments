@@ -25,8 +25,13 @@ public class HttpServerApp {
 
         var executor = Executors.newFixedThreadPool(10);
 
+        int connections = 0;
+
         while (true) {
             var connection = serverSocket.accept();
+
+            connections++;
+            System.out.println("We have new connection! All = " + connections);
 
             connection.setSoTimeout(10_000);
 
@@ -149,22 +154,7 @@ public class HttpServerApp {
             var request = requestOpt.get();
             printRequest(request);
 
-            var os = connection.getOutputStream();
-            var body = """
-                    {
-                        "id": 1
-                    }
-                    """;
-
-            var response = """
-                    HTTP/1.1 200 OK
-                    Content-Type: application/json
-                    Content-Length: %d
-                                            
-                    %s
-                    """.formatted(body.getBytes(StandardCharsets.UTF_8).length, body);
-
-            os.write(response.getBytes(StandardCharsets.UTF_8));
+            respondToRequest(connection, request);
 
             if (shouldReuseConnection(request.headers)) {
                 handleRequest(connection);
@@ -188,6 +178,43 @@ public class HttpServerApp {
         } catch (Exception ignored) {
 
         }
+    }
+
+    private static void respondToRequest(Socket connection, HttpReq req) throws Exception {
+        var res = requestResponse(req);
+
+        var os = connection.getOutputStream();
+
+        var resHead = new StringBuilder("HTTP/1.1 %d".formatted(res.responseCode));
+
+        res.headers().forEach((k, vs) ->
+                vs.forEach(v ->
+                        resHead.append(HTTP_NEW_LINE_SEPARATOR)
+                                .append(k)
+                                .append(": ")
+                                .append(v)));
+
+        resHead.append(HTTP_HEAD_BODY_SEPARATOR);
+
+        os.write(resHead.toString().getBytes(StandardCharsets.US_ASCII));
+
+        if (res.body().length > 0) {
+            os.write(res.body());
+        }
+    }
+
+    private static HttpRes requestResponse(HttpReq req) {
+        var body = """
+                {
+                    "id": 1
+                }
+                """.getBytes(StandardCharsets.UTF_8);
+
+
+        var headers = Map.of("Content-Type", List.of("application/json"),
+                "Content-Length", List.of(String.valueOf(body.length)));
+
+        return new HttpRes(200, headers, body);
     }
 
     private static boolean shouldReuseConnection(Map<String, List<String>> headers) {
@@ -216,5 +243,10 @@ public class HttpServerApp {
                            Map<String, List<String>> headers,
                            byte[] body) {
 
+    }
+
+    private record HttpRes(int responseCode,
+                           Map<String, List<String>> headers,
+                           byte[] body) {
     }
 }
