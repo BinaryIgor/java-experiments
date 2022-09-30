@@ -8,6 +8,8 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SimpleHttpServer implements HttpServer {
 
@@ -23,8 +25,8 @@ public class SimpleHttpServer implements HttpServer {
     private final Executor requestsExecutor;
     private final int port;
     private final int connectionTimeout;
-    private ServerSocket serverSocket;
-    private boolean running;
+    private final AtomicReference<ServerSocket> serverSocket = new AtomicReference<>();
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
     public SimpleHttpServer(Executor requestsExecutor, int port, int connectionTimeout) {
         this.requestsExecutor = requestsExecutor;
@@ -41,21 +43,23 @@ public class SimpleHttpServer implements HttpServer {
     }
 
     private boolean isServerRunning() {
-        return serverSocket != null && running;
+        return serverSocket.get() != null && running.get();
     }
 
     private void startServer(HttpRequestHandler handler) {
         try {
-            serverSocket = new ServerSocket(port);
-            running = true;
+            serverSocket.set(new ServerSocket(port));
+            running.set(true);
         } catch (Exception e) {
             throw new RuntimeException("Fail to start a SimpleHttpServer on %d".formatted(port), e);
         }
 
+        var server = serverSocket.get();
+
         new Thread(() -> {
             try {
-                while (isServerRunning()) {
-                    var connection = serverSocket.accept();
+                while (true) {
+                    var connection = server.accept();
                     connection.setSoTimeout(connectionTimeout);
                     requestsExecutor.execute(() -> handleRequest(connection, handler));
                 }
@@ -259,12 +263,12 @@ public class SimpleHttpServer implements HttpServer {
     public void stop() {
         if (isServerRunning()) {
             try {
-                serverSocket.close();
+                serverSocket.get().close();
             } catch (Exception e) {
                 throw new RuntimeException("Fail to close the server", e);
             } finally {
-                serverSocket = null;
-                running = false;
+                serverSocket.set(null);
+                running.set(false);
             }
         }
     }

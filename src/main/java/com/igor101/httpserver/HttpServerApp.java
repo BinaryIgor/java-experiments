@@ -7,8 +7,8 @@ import java.util.concurrent.Executors;
 
 public class HttpServerApp {
 
-    public static void main(String[] args) throws Exception {
-        var server = new SimpleHttpServer(Executors.newFixedThreadPool(10), 8080, 10_000);
+    public static void main(String[] args) {
+        var server = new SimpleHttpServer(Executors.newFixedThreadPool(10), 8080, 30_000);
 
         server.start(r -> {
             var body = """
