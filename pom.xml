@@ -13,8 +13,13 @@
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <junit.version>5.9.0</junit.version>
         <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
+
+        <junit.version>5.9.0</junit.version>
+        <testcontainers.version>1.16.3</testcontainers.version>
+
+        <postgresql.version>42.2.12</postgresql.version>
+        <spring.jdbc.version>5.3.23</spring.jdbc.version>
     </properties>
 
     <dependencies>
@@ -23,6 +28,23 @@
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgresql.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>${spring.jdbc.version}</version>
         </dependency>
     </dependencies>
 
