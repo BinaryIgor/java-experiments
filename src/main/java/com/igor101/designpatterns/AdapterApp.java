@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /*
-Adapter pattern (sometimes also called Wrapper)
+Adapter pattern (sometimes also called a Wrapper)
 allows existing interface/class to be used as another interface or class.
 
 It has two major usages:
