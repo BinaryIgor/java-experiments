@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta  name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/css/styles_1666107074.css">
+    <title>Igor Roztropiński</title>
+    <meta property="description"
+          content= "Personal site of Igor Roztropiński" />
+    <meta name ="author" content="Igor Roztropiński" />
+    <script>
+        (function () {
+            const KEY = "MODE";
+            const LIGHT_MODE = 'light';
+            const DARK_MODE = 'dark';
+
+            const currentMode = () => {
+                const mode = localStorage.getItem(KEY);
+                if (mode) {
+                    return mode;
+                }
+                return DARK_MODE;
+            }
+
+            const setDarkMode = () => document.documentElement.classList.add(DARK_MODE);
+
+            const setLightMode = () => document.documentElement.classList.remove(DARK_MODE);
+
+            const mode = currentMode();
+            if (mode == LIGHT_MODE) {
+                setLightMode();
+            } else {
+                setDarkMode();
+            }
+        })();
+    </script>
+</head>
+
+<body>
+<nav class="top-nav fade-in hidden">
+    <a href="home" class="left-underline">Home</a>
+    <a href="about" class="left-underline">About</a>
+    <a href="skills" class="left-underline">Skills</a>
+    <a href="experience" class="left-underline">Experience</a>
+    <a href="code" class="left-underline">Code</a>
+    <a href="https://youtube.com" class="hidden-link" ></a>
+
+    <div class="theme-mode">
+        0
+    </div>
+    <div id="nav-mobile-menu">Menu</div>
+</nav>
+
+<nav class="top-nav-mobile fade-in hidden">
+        <span id="nav-mobile-close" class="clickable">
+            x
+        </span>
+
+    <div>
+        <a href="home" class="left-underline">Home</a>
+    </div>
+    <div>
+        <a href="about" class="left-underline">About</a>
+    </div>
+    <div>
+        <a href="skills" class="left-underline">Skills</a>
+    </div>
+    <div>
+        <a href="experience" class="left-underline">Experience</a>
+    </div>
+    <div>
+        <a href="code" class="left-underline">Code</a>
+    </div>
+</nav>
+
+<canvas id="canvas"></canvas>
+
+<div id="component" class="hidden"></div>
+
+<script>
+        const URL_PROPERTY_REGEX = /url\((.*)\)/;
+
+        function setupMode() {
+            const KEY = "MODE";
+
+            const LIGHT_MODE = 'light';
+            const DARK_MODE = 'dark';
+            const DARK_MODE_ICON = "0";
+            const LIGHT_MODE_ICON = "1";
+
+            const DISPLAY_MOBILE_NAV_CLASS = "display";
+
+            const topNav = document.querySelector(".top-nav");
+            const themeMode = document.querySelector('.theme-mode');
+            const topNavMobile = document.querySelector('.top-nav-mobile');
+            const navMobile = document.getElementById('nav-mobile-menu');
+            const navMobileClose = document.querySelector('#nav-mobile-close');
+
+            const currentMode = () => {
+                const mode = localStorage.getItem(KEY);
+                if (mode) {
+                    return mode;
+                }
+                return DARK_MODE;
+            }
+
+            const setDarkMode = () => {
+                document.documentElement.classList.add(DARK_MODE);
+                localStorage.setItem(KEY, DARK_MODE)
+                themeMode.textContent = DARK_MODE_ICON;
+            };
+
+            const setLightMode = () => {
+                document.documentElement.classList.remove(DARK_MODE);
+                localStorage.setItem(KEY, LIGHT_MODE)
+                themeMode.textContent = LIGHT_MODE_ICON;
+            };
+
+            if (currentMode() == LIGHT_MODE) {
+                setLightMode();
+            } else {
+                setDarkMode();
+            }
+
+            themeMode.addEventListener('click', e => {
+                if (currentMode() == LIGHT_MODE) {
+                    setDarkMode();
+                } else {
+                    setLightMode();
+                }
+                document.dispatchEvent(new Event("themeChange"));
+            });
+
+            navMobile.addEventListener('click', () => topNavMobile.classList.add(DISPLAY_MOBILE_NAV_CLASS));
+
+            topNav.addEventListener("click", e => e.stopPropagation());
+
+            navMobileClose.addEventListener('click', () => topNavMobile.classList.remove(DISPLAY_MOBILE_NAV_CLASS));
+        }
+
+        setupMode();
+    </script>
+<script type="module" src="/js/rain-app_1666107074.js">
+</script>
+<script type="module" src="/js/app_1666107074.js">
+</script>
+</body>
+
+</html>

@@ -1,6 +1,6 @@
 # Maven
 target/
-#Intellij
+# Intellij
 .idea/
 *.iml
 .classpath
