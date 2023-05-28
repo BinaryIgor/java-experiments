@@ -1,5 +1,6 @@
 package com.igor101.streaming;
 
+import com.igor101.events.Events;
 import com.igor101.streaming.handler.GroupedEmissionUnitClicksViewsBatchHandler;
 import com.igor101.streaming.model.Click;
 import com.igor101.streaming.model.Emission;
@@ -16,30 +17,27 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class EmissionClickViewStream {
+public class EmissionClickViewStreamHandler implements EventsStreamHandler {
 
     private final Map<UUID, Emission> emissions = new ConcurrentHashMap<>();
     private final Map<String, Click> clicks = new ConcurrentHashMap<>();
     private final Map<String, View> views = new ConcurrentHashMap<>();
     private final GroupedEmissionUnitClicksViewsBatchHandler groupedEmissionUnitClicksViewsBatchHandler;
 
-    public EmissionClickViewStream(
+    public EmissionClickViewStreamHandler(
             GroupedEmissionUnitClicksViewsBatchHandler groupedEmissionUnitClicksViewsBatchHandler) {
         this.groupedEmissionUnitClicksViewsBatchHandler = groupedEmissionUnitClicksViewsBatchHandler;
+
     }
 
-    public void onEmission(Emission emission) {
-        emissions.put(emission.id(), emission);
+    @Override
+    public void subscribe(Events events) {
+        events.subscribe(Emission.class, e -> emissions.put(e.id(), e));
+        events.subscribe(Click.class, c -> clicks.put(c.emissionUnitId(), c));
+        events.subscribe(View.class, v -> views.put(v.emissionUnitId(), v));
     }
 
-    public void onClick(Click click) {
-        clicks.put(click.emissionUnitId(), click);
-    }
-
-    public void onView(View view) {
-        views.put(view.emissionUnitId(), view);
-    }
-
+    @Override
     public void consume() {
         System.out.printf("Consuming %d emissions, %d clicks and %d views...%n", emissions.size(), clicks.size(),
                 views.size());

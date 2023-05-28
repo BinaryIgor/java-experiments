@@ -2,6 +2,7 @@ package com.igor101.streaming;
 
 import com.igor101.events.EventPublisher;
 import com.igor101.events.InMemoryEvents;
+import com.igor101.streaming.handler.GroupedEmissionUnitClicksViewsBatchHandler;
 import com.igor101.streaming.model.StatsEntry;
 import com.igor101.streaming.repository.InMemoryStatsRepository;
 import com.igor101.streaming.repository.StatsRepository;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -30,7 +32,11 @@ public class StreamingAppTest {
         publisher = events.publisher();
         statsRepository = new InMemoryStatsRepository();
 
-        app = new StreamingApp(events, statsRepository, CONSUME_DELAY_SECONDS);
+        var batchHandler = new GroupedEmissionUnitClicksViewsBatchHandler(statsRepository,
+                timestamp -> timestamp.truncatedTo(ChronoUnit.DAYS));
+        var eventsStreamHandler = new EmissionClickViewStreamHandler(batchHandler);
+
+        app = new StreamingApp(events, eventsStreamHandler, CONSUME_DELAY_SECONDS);
 
         publishingExecutor = Executors.newFixedThreadPool(10);
     }

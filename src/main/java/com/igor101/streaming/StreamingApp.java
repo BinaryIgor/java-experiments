@@ -1,13 +1,7 @@
 package com.igor101.streaming;
 
 import com.igor101.events.Events;
-import com.igor101.streaming.handler.GroupedEmissionUnitClicksViewsBatchHandler;
-import com.igor101.streaming.model.Click;
-import com.igor101.streaming.model.Emission;
-import com.igor101.streaming.model.View;
-import com.igor101.streaming.repository.StatsRepository;
 
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -15,30 +9,31 @@ import java.util.concurrent.TimeUnit;
 public class StreamingApp {
 
     private final Events events;
-    private final StatsRepository statsRepository;
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final EventsStreamHandler eventsStreamHandler;
+    private final ScheduledExecutorService scheduler;
     private final long consumeDelaySeconds;
 
     public StreamingApp(Events events,
-                        StatsRepository statsRepository,
+                        EventsStreamHandler eventsStreamHandler,
+                        ScheduledExecutorService scheduler,
                         long consumeDelaySeconds) {
         this.events = events;
-        this.statsRepository = statsRepository;
+        this.eventsStreamHandler = eventsStreamHandler;
+        this.scheduler = scheduler;
         this.consumeDelaySeconds = consumeDelaySeconds;
     }
 
+    public StreamingApp(Events events,
+                        EventsStreamHandler eventsStreamHandler,
+                        long consumeDelaySeconds) {
+        this(events, eventsStreamHandler, Executors.newSingleThreadScheduledExecutor(), consumeDelaySeconds);
+    }
+
     public void start() {
-        var groupedEmissionUnitClickViewsBatchHandler = new GroupedEmissionUnitClicksViewsBatchHandler(statsRepository,
-                t -> t.truncatedTo(ChronoUnit.DAYS));
-        var stream = new EmissionClickViewStream(groupedEmissionUnitClickViewsBatchHandler);
-
-        events.subscribe(Emission.class, stream::onEmission);
-        events.subscribe(Click.class, stream::onClick);
-        events.subscribe(View.class, stream::onView);
-
+        eventsStreamHandler.subscribe(events);
         scheduler.scheduleWithFixedDelay(() -> {
             try {
-                stream.consume();
+                eventsStreamHandler.consume();
             } catch (Exception e) {
                 System.err.println("Problem while consuming...");
                 e.printStackTrace();
