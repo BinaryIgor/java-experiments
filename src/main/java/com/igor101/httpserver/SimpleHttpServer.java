@@ -61,7 +61,7 @@ public class SimpleHttpServer implements HttpServer {
                 while (true) {
                     var connection = server.accept();
                     connection.setSoTimeout(connectionTimeout);
-                    requestsExecutor.execute(() -> handleRequest(connection, handler));
+                    handleRequest(() -> handleRequest(connection, handler));
                 }
             } catch (Exception e) {
                 if (isServerRunning()) {
@@ -71,6 +71,14 @@ public class SimpleHttpServer implements HttpServer {
                 System.out.println("Closing server...");
             }
         }).start();
+    }
+
+    private void handleRequest(Runnable request) {
+        if (requestsExecutor == null) {
+            Thread.startVirtualThread(request);
+        } else {
+            requestsExecutor.execute(request);
+        }
     }
 
     private void handleRequest(Socket connection, HttpRequestHandler requestHandler) {
@@ -249,7 +257,7 @@ public class SimpleHttpServer implements HttpServer {
         System.out.println("Url: " + req.url());
         System.out.println("Headers:");
         req.headers().forEach((k, v) -> {
-            System.out.println("%s - %s".formatted(k, v));
+            System.out.printf("%s - %s%n", k, v);
         });
         System.out.println("Body:");
         if (req.body().length > 0) {

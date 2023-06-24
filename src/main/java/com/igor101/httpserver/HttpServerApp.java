@@ -4,11 +4,24 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
+/*
+
+const requests = [];
+for (let i =0; i< 1000; i++){
+    requests.push(fetch("http:localhost:8080"));
+}
+
+console.log(`Performing ${requests.length} requests...`);
+
+Promise.all(requests)
+    .then(r => console.log(`Finished ${requests.length} requests!`));
+
+ */
 
 public class HttpServerApp {
 
     public static void main(String[] args) {
-        var server = new SimpleHttpServer(Executors.newFixedThreadPool(10), 8080, 30_000);
+        var server = new SimpleHttpServer(null, 8080, 30_000);
 
         server.start(r -> {
             var body = """
