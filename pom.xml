@@ -20,6 +20,9 @@
 
         <postgresql.version>42.2.12</postgresql.version>
         <spring.jdbc.version>5.3.23</spring.jdbc.version>
+
+        <jooq.version>3.14.7</jooq.version>
+        <hikari.version>3.4.2</hikari.version>
     </properties>
 
     <dependencies>
@@ -45,6 +48,17 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
             <version>${spring.jdbc.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+            <version>${jooq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${hikari.version}</version>
         </dependency>
     </dependencies>
 
