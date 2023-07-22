@@ -22,6 +22,7 @@
         <spring.jdbc.version>5.3.23</spring.jdbc.version>
         <hikari.version>5.0.1</hikari.version>
         <slf4j.version>1.8.0-beta4</slf4j.version>
+        <jooq.version>3.17.4</jooq.version>
     </properties>
 
     <dependencies>
@@ -47,6 +48,11 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
             <version>${spring.jdbc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+            <version>${jooq.version}</version>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
