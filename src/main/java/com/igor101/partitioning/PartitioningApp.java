@@ -22,8 +22,8 @@ public class PartitioningApp {
     private final static List<Integer> COUNTRY_CODES = IntStream.range(0, 20).boxed().toList();
 
     public static void main(String[] args) throws Exception {
-        prepareData();
-//        executeQueries();
+//        prepareData();
+        executeQueries();
     }
 
     private static void prepareData() throws Exception {
@@ -72,7 +72,7 @@ public class PartitioningApp {
     private static void executeQueries() throws Exception {
         var repository = repository();
 
-        var queriesInstances = 50;
+        var queriesInstances = 100;
 
         var delay = 100;
 

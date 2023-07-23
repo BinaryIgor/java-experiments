@@ -53,7 +53,6 @@ public class SqlAccountRepository {
         accountNotPartitionedInsert.execute();
     }
 
-
     public void executeQuery(String query) {
         context.execute(query);
     }
