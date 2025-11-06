@@ -33,7 +33,6 @@ public class RecordsApp {
         Optional<UserRole> firstRole() {
             return roles.isEmpty() ? Optional.empty() : Optional.of(roles.get(0));
         }
-
     }
 
     record UserRole(String name, String description) {

@@ -69,7 +69,7 @@ public class SqlUserRepositoryTest {
 
     @Test
     void ofId_givenNonExistingUserId_shouldReturnEmpty() {
-        var user = new User(2, "Some User", "some.user@email.com");
+        var user = new User(2, "Some com.igor101.User", "some.user@email.com");
 
         createUser(user);
 
