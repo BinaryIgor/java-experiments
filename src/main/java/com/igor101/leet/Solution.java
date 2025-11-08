@@ -1,21 +1,22 @@
 package com.igor101.leet;
 
-import java.time.Instant;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 public class Solution {
     public static void main(String[] args) throws Exception {
-//        ValidParentheses.runCases();
-        var cache = new LRUCache(2);
-        cache.put(1, 11);
-        cache.put(2, 12);
-        cache.get(1);
-        cache.put(3, 13);
+        NumberOfIslands.runCases();
+    }
 
-
-        System.out.println(cache.get(1));
-        System.out.println(cache.get(2));
-        System.out.println(cache.get(3));
+    static void printCacheList(LRUCache cache) {
+        var node = cache.head();
+        while (node != null) {
+            System.out.println(node);
+            node = node.nextValue();
+        }
+        System.out.println("-----");
+        System.out.println();
     }
 
 

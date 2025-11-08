@@ -6,8 +6,6 @@ import java.util.Map;
 
 public class ValidParentheses {
 
-    private static final List<Character> OPENING = List.of('(', '{', '[');
-    private static final List<Character> CLOSING = List.of(')', '}', ']');
     private static final Map<Character, Character> OPENING_TO_CLOSING = Map.of(
             '(', ')',
             '{', '}',
