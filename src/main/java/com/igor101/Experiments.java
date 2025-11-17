@@ -1,18 +1,13 @@
 package com.igor101;
 
-import java.io.BufferedInputStream;
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Experiments {
@@ -21,29 +16,88 @@ public class Experiments {
     private static final Random RANDOM = new SecureRandom();
 
     public static void main(String[] args) throws Exception {
-        var data1 = new SomeData(1, "Ala");
-        var data2 = new SomeData(2, "Bob");
-        var data3 = new SomeData(3, "Bob");
+//        var executor = Executors.newVirtualThreadPerTaskExecutor();
+//
+//        var futures = new ArrayList<Future<Integer>>();
+//
+//        for (int i = 0; i < 100; i++) {
+//            int finalI = i;
+//            var f = executor.submit(() -> {
+//                try {
+//                    Thread.sleep(100);
+//                    if (RANDOM.nextBoolean()) {
+//                        Thread.yield();
+//                    }
+//                    Thread.sleep(200);
+//                    return 10;
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                    return -1;
+//                }
+//            });
+//
+//            futures.add(f);
+//        }
+//
+//        var results = futures.stream()
+//                .map(f -> {
+//                    try {
+//                        return f.get();
+//                    } catch (Exception e) {
+//                        throw new RuntimeException(e);
+//                }}).reduce(Integer::sum);
+//
+//        System.out.println(results.orElseThrow());
 
-        System.out.println(data1);
-        System.out.println(data2);
-        System.out.println(data3);
-        System.out.println(new SomeData(1, "Ala"));
-        System.out.println(new SomeData(1, "Ala"));
-        System.out.println(new SomeData(1, "Ala"));
+//        var latch = new CountDownLatch(1);
+//        var executor = Executors.newVirtualThreadPerTaskExecutor();
+//
+//        var threads = new CopyOnWriteArrayList<Thread>();
+//
+//        for (int i =0; i< 100; i++) {
+//            executor.submit(() -> {
+//                try {
+//                    threads.add(Thread.currentThread());
+//                    if (latch.await(1, TimeUnit.SECONDS)) {
+//                        System.out.println(Instant.now() + ": executing on a thread - " + Thread.currentThread());
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            });
+//        }
+//
+//        Thread.sleep(500);
+//
+//        latch.countDown();
+//        Thread.sleep(500);
 
-        System.out.println("---");
-        System.out.println("Map tests...");
-        System.out.println("----");
 
-        var map =new HashMap<SomeData, Integer>();
-        map.put(data1, 1);
-        map.put(data1, 1);
-        map.put(data1, 1);
-        map.put(new SmartData(1, "Ala"), 1);
-        map.put(new SmartData(1, "Ala"), 1);
 
-        System.out.println(map);
+
+        var list = new ArrayList<Integer>();
+
+        var executor = Executors.newVirtualThreadPerTaskExecutor();
+
+        for(int i =0; i < 100; i++) {
+            var value = i * i;
+            executor.execute(() -> {
+                list.add(value);
+                list.forEach(e -> {
+                    //
+                });
+            });
+        }
+
+        Thread.sleep(1000);
+    }
+
+    private static <T> T waitForFutureResult(Future<T> future) {
+        try {
+            return future.get(5, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static String randomId() {
@@ -58,7 +112,7 @@ public class Experiments {
         final String name;
 
         public SomeData(long id, String name) {
-            this.id  = id;
+            this.id = id;
             this.name = name;
         }
     }
