@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Solution {
     public static void main(String[] args) throws Exception {
-        ArrayProcessor.runCases();
+        CoinChange.runCases();
     }
 
     static void printCacheList(LRUCache cache) {
