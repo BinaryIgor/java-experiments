@@ -1,6 +1,5 @@
 package com.igor101.leet;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -19,46 +18,36 @@ public class CoinChange {
     }
 
     static int coinChange(int[] coins, int amount) {
-        if (coins.length == 0) {
-            return amount == 0 ? 0 : -1;
+        final int INF = 1 << 30;
+
+        int numberOfCoins = coins.length;
+        int targetAmount = amount;
+        int[][] dp = new int[numberOfCoins + 1][targetAmount + 1];
+
+        for (int[] row : dp) {
+            Arrays.fill(row, INF);
         }
-        if (amount == 0) {
-            return 0;
+
+        dp[0][0] = 0;
+
+        for (int i = 1; i <= numberOfCoins; i++) {
+            for (int j = 0; j <= targetAmount; j++) {
+                dp[i][j] = dp[i - 1][j];
+                if (j >= coins[i - 1]) {
+                    // Take minimum between not using current coin and using it
+                    // When using current coin: add 1 to the count and reduce amount by coin value
+                    dp[i][j] = Math.min(dp[i][j], dp[i][j - coins[i - 1]] + 1);
+                }
+            }
         }
 
-        Arrays.sort(coins);
-//
-//        var solution = Integer.MAX_VALUE;
-//        for (int i = coins.length - 1; i >= 0; i--) {
-//            var s = checkCoins(coins, amount, i, 0, 0, solution);
-//            System.out.println("Solution: " + s);
-//            if (s != -1 && s < solution) {
-//                solution = s;
-//            }
-//        }
-//
-//        return solution == Integer.MAX_VALUE ? -1 : solution;
-//        var bestSolution = -1;
-//        for (int i = coins.length - 1; i >= 0; i--) {
-//            var solution = findCoinChange(coins, amount, i, 0, 0);
-//            if (solution != -1 && (bestSolution == -1 || solution < bestSolution)) {
-//                bestSolution = solution;
-//            }
-//        }
-
-
-        var solutions = new PriorityQueue<Integer>();
-
-        findCoinChange(coins, amount, coins.length - 1, 0, 0, solutions);
-
-        System.out.println("Solutions: " + solutions);
-
-        return solutions.isEmpty() ? -1 : solutions.peek();
+        return dp[numberOfCoins][targetAmount] == INF ? -1 : dp[numberOfCoins][targetAmount];
     }
 
     private static void findCoinChange(int[] coins, int amount, int startIndex,
-                                      int currentCoins, int currentAmount,
-                                      PriorityQueue<Integer> solutions) {
+                                       int currentCoins, int currentAmount,
+                                       PriorityQueue<Integer> solutions,
+                                       boolean[][] checkedSolutions) {
         for (int i = startIndex; i >= 0; i--) {
             var coin = coins[i];
             var amountWithCoin = currentAmount + coin;
@@ -71,7 +60,7 @@ public class CoinChange {
             }
 
             if (amountWithCoin < amount && (solutions.isEmpty() || nextSolution < solutions.peek())) {
-                findCoinChange(coins, amount, i, nextSolution, amountWithCoin, solutions);
+                findCoinChange(coins, amount, i, nextSolution, amountWithCoin, solutions, checkedSolutions);
             }
         }
     }
@@ -96,13 +85,15 @@ public class CoinChange {
 
         static List<Case> cases() {
             return List.of(
+                    new Case(new int[]{411, 412, 413, 414, 415, 416, 417, 418, 419, 420, 421, 422}, 9864, 24),
                     new Case(new int[]{1, 2, 5}, 11, 3),
-                    new Case(new int[]{2}, 3, -1),
-                    new Case(new int[]{186, 419, 83, 408}, 6249, 20),
-                    new Case(new int[]{1}, 0, 0),
-                    new Case(new int[]{1, 2, 4, 5}, 8, 2),
-                    new Case(new int[]{1, 2, 4, 5}, 11, 3),
-                    new Case(new int[]{1, 2}, 200, 100)
+                    new Case(new int[]{1, 2, 5, 8}, 63, 9)
+//                    new Case(new int[]{2}, 3, -1),
+//                    new Case(new int[]{186, 419, 83, 408}, 6249, 20),
+//                    new Case(new int[]{1}, 0, 0),
+//                    new Case(new int[]{1, 2, 4, 5}, 8, 2),
+//                    new Case(new int[]{1, 2, 4, 5}, 11, 3),
+//                    new Case(new int[]{1, 2}, 200, 100)
             );
         }
     }
