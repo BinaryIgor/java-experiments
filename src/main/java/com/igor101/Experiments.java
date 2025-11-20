@@ -72,24 +72,8 @@ public class Experiments {
 //        latch.countDown();
 //        Thread.sleep(500);
 
-
-
-
-        var list = new ArrayList<Integer>();
-
-        var executor = Executors.newVirtualThreadPerTaskExecutor();
-
-        for(int i =0; i < 100; i++) {
-            var value = i * i;
-            executor.execute(() -> {
-                list.add(value);
-                list.forEach(e -> {
-                    //
-                });
-            });
-        }
-
-        Thread.sleep(1000);
+        System.out.println(SomeData.class.getClassLoader());
+        System.out.println(SomeData.class.getName());
     }
 
     private static <T> T waitForFutureResult(Future<T> future) {

@@ -6,7 +6,51 @@ import java.util.List;
 
 public class Solution {
     public static void main(String[] args) throws Exception {
-        CoinChange.runCases();
+        CourseSchedule.runCases();
+    }
+
+    static int binarySearch(int[] items, int item) {
+        return binarySearch(items, items.length, item);
+    }
+
+    static int greaterOrEqualBinarySearch(int[] items, int item) {
+        return greaterOrEqualBinarySearch(items, items.length, item);
+    }
+
+    static int binarySearch(int[] items, int size, int item) {
+        int low = 0;
+        int high = size - 1;
+
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            int midVal = items[mid];
+            if (midVal > item) {
+                high = mid - 1;
+            } else if (midVal < item) {
+                low = mid + 1;
+            } else {
+                return mid;
+            }
+        }
+
+        return -1;
+    }
+
+    private static int greaterOrEqualBinarySearch(int[] items, int size, int item) {
+        int low = 0;
+        int high = size - 1;
+
+        while (low <= high) {
+            int mid = (low + high) / 2;
+            int midVal = items[mid];
+            if (midVal >= item) {
+                return mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+
+        return -1;
     }
 
     static void printCacheList(LRUCache cache) {
