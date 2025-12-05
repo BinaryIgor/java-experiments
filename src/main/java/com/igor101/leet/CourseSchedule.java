@@ -5,16 +5,6 @@ import java.util.stream.Collectors;
 
 public class CourseSchedule {
 
-    static void runCases() {
-        Case.cases().forEach(c -> {
-            var canFinish = canFinish(c.courses, c.prerequisites);
-            if (canFinish != c.canFinish) {
-                throw new RuntimeException("Expected canFinish %b for %s prerequisites, but got %b"
-                        .formatted(c.canFinish, Arrays.deepToString(c.prerequisites), canFinish));
-            }
-        });
-    }
-
     static boolean canFinish(int numCourses, int[][] prerequisites) {
         if (prerequisites.length == 0) {
             return true;

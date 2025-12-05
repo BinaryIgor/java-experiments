@@ -6,16 +6,6 @@ import java.util.List;
 
 public class LongestIncreasingSubsequence {
 
-    static void runCases() {
-        Case.cases().forEach(c -> {
-            var actual = length(c.nums);
-            if (actual != c.output) {
-                throw new RuntimeException("Expected to get %d for %s input, but got %d"
-                        .formatted(c.output, Arrays.toString(c.nums), actual));
-            }
-        });
-    }
-
     static int length(int[] nums) {
         var longestSubsequences = new ArrayList<Integer>();
         for (int num : nums) {
@@ -59,6 +49,14 @@ public class LongestIncreasingSubsequence {
                     new Case(new int[]{0, 1, 0, 3, 2, 3}, 4),
                     new Case(new int[]{7, 7, 7, 7, 7, 7}, 1)
             );
+        }
+
+        @Override
+        public String toString() {
+            return "Case{" +
+                    "nums=" + Arrays.toString(nums) +
+                    ", output=" + output +
+                    '}';
         }
     }
 }

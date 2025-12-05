@@ -1,19 +1,8 @@
 package com.igor101.leet;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class ContainerWithMostWater {
-
-    static void runCases() {
-        Case.cases().forEach(c -> {
-            var actual = maxArea(c.height);
-            if (actual != c.area) {
-                throw new RuntimeException("Expected %d area for %s heights but got %d"
-                        .formatted(c.area, Arrays.toString(c.height), actual));
-            }
-        });
-    }
 
     public static int maxArea(int[] height) {
         int i = 0, j = height.length - 1;

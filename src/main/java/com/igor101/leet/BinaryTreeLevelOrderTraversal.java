@@ -4,16 +4,6 @@ import java.util.*;
 
 public class BinaryTreeLevelOrderTraversal {
 
-    static void runCases() {
-        Case.cases().forEach(c -> {
-            var actual = levelOrder(c.tree);
-            if (!actual.equals(c.expectedLevelOrderTraversal)) {
-                throw new RuntimeException("Unexpected traversal! Expected %s, but got %s"
-                        .formatted(c.expectedLevelOrderTraversal, actual));
-            }
-        });
-    }
-
     static List<List<Integer>> levelOrder(TreeNode root) {
         if (root == null) {
             return List.of();

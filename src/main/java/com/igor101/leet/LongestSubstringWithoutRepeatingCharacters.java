@@ -5,16 +5,6 @@ import java.util.List;
 
 public class LongestSubstringWithoutRepeatingCharacters {
 
-    public static void runCases() {
-        Case.cases().forEach(c -> {
-            var actual = length(c.input);
-            if (actual != c.expected) {
-                throw new RuntimeException("Expected length %d, but got %d for %s input"
-                        .formatted(c.expected, actual, c.input));
-            }
-        });
-    }
-
     public static int length(String s) {
         var longest = 0;
         var nonRepeating = new HashSet<Character>();

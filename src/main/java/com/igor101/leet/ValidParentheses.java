@@ -12,17 +12,6 @@ public class ValidParentheses {
             '[', ']'
     );
 
-    public static void runCases() {
-        ValidParenthesesCase.cases()
-                .forEach(c -> {
-                    var actual = isValid(c.string());
-                    if (actual != c.isValid()) {
-                        throw new RuntimeException("Expected %s isValid but got %s for %s string"
-                                .formatted(c.isValid(), actual, c.string()));
-                    }
-                });
-    }
-
     public static boolean isValid(String s) {
         if (s.length() < 2) {
             return false;
@@ -45,14 +34,14 @@ public class ValidParentheses {
         return opening.isEmpty();
     }
 
-    record ValidParenthesesCase(String string, boolean isValid) {
+    record Case(String string, boolean isValid) {
 
-        public static List<ValidParenthesesCase> cases() {
+        public static List<Case> cases() {
             return List.of(
-                    new ValidParenthesesCase("()", true),
-                    new ValidParenthesesCase("()[]{}", true),
-                    new ValidParenthesesCase("()", true),
-                    new ValidParenthesesCase("([)]", false)
+                    new Case("()", true),
+                    new Case("()[]{}", true),
+                    new Case("()", true),
+                    new Case("([)]", false)
             );
         }
     }

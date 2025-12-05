@@ -1,19 +1,8 @@
 package com.igor101.leet;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class NumberOfIslands {
-
-    static void runCases() {
-        Case.cases().forEach(c -> {
-            var actual = number(c.grid);
-            if (actual != c.islands) {
-                throw new RuntimeException("Expected %d islands but got %d for %s grid"
-                        .formatted(c.islands, actual, Arrays.deepToString(c.grid)));
-            }
-        });
-    }
 
     static int number(char[][] grid) {
         boolean[][] checked = new boolean[grid.length][grid[0].length];

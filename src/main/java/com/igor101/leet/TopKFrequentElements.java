@@ -4,17 +4,6 @@ import java.util.*;
 
 public class TopKFrequentElements {
 
-    public static void runCases() {
-        Case.cases().forEach(c -> {
-            var actual = topKFrequent(c.nums, c.k);
-            if (!Arrays.equals(actual, c.expected)) {
-                throw new RuntimeException("Expected %s as most frequent, but got %s for nums=%s, k=%d"
-                        .formatted(Arrays.toString(c.expected), Arrays.toString(actual),
-                                Arrays.toString(c.nums), c.k));
-            }
-        });
-    }
-
     public static int[] topKFrequent(int[] nums, int k) {
         var numsFrequencies = new HashMap<Integer, Integer>();
 
@@ -46,6 +35,11 @@ public class TopKFrequentElements {
                     new Case(new int[]{1}, 1, new int[]{1}),
                     new Case(new int[]{1, 2, 1, 2, 1, 2, 3, 1, 3, 2}, 2, new int[]{1, 2})
             );
+        }
+
+        @Override
+        public String toString() {
+            return "Case[nums=%s, k=%d,expected=%s]".formatted(Arrays.toString(nums), k, Arrays.toString(expected));
         }
     }
 }
