@@ -16,6 +16,7 @@
         <surefire.plugin.version>3.0.0-M4</surefire.plugin.version>
 
         <junit.version>5.9.0</junit.version>
+        <assert4j.version>3.27.6</assert4j.version>
         <testcontainers.version>1.16.3</testcontainers.version>
 
         <postgresql.version>42.2.12</postgresql.version>
@@ -30,6 +31,12 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assert4j.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
