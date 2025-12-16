@@ -28,27 +28,40 @@ public class InMemoryAlertNetwork implements AlertNetwork {
 
     @Override
     public List<String> findAlertPropagationPath(String source, String target) {
-        var alertPropagationPath = new ArrayList<String>();
-        var shortestPropagationPath = List.<String>of();
+        var parent = new HashMap<String, String>();
 
-        var servicesToCheck = new PriorityQueue<String>();
-        servicesToCheck.add(source);
-        while (!servicesToCheck.isEmpty()) {
-            var nextService = servicesToCheck.poll();
-            alertPropagationPath.add(nextService);
+        var queue = new ArrayDeque<String>();
+        queue.add(source);
+        var pathFound = false;
+
+
+        while (!queue.isEmpty()) {
+            var nextService = queue.poll();
+
+            // early exit - first occurrence means the best path
             if (nextService.equals(target)) {
-                if (shortestPropagationPath.isEmpty() || alertPropagationPath.size() < shortestPropagationPath.size()) {
-                    shortestPropagationPath = alertPropagationPath;
+                pathFound = true;
+                break;
+            }
+
+            for (var reachableService : dependenciesToServices.getOrDefault(nextService, List.of())) {
+                if (!parent.containsKey(reachableService)) {
+                    parent.put(reachableService, nextService);
+                    queue.add(reachableService);
                 }
-                alertPropagationPath = new ArrayList<>();
-                alertPropagationPath.add(source);
-            } else {
-                var reachableServices = dependenciesToServices.getOrDefault(nextService, List.of());
-                servicesToCheck.addAll(reachableServices);
             }
         }
 
-        return shortestPropagationPath;
+        if (!pathFound) {
+            return List.of();
+        }
+
+        var shortestPath = new LinkedList<String>();
+        for (var previous = target; previous != null; previous = parent.get(previous)) {
+            shortestPath.add(previous);
+        }
+        Collections.reverse(shortestPath);
+        return shortestPath;
     }
 
     @Override
