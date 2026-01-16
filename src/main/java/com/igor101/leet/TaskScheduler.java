@@ -1,7 +1,7 @@
 package com.igor101.leet;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,69 +13,75 @@ public class TaskScheduler {
             taskFrequencies.merge(t, 1, Integer::sum);
         }
 
-        var frequenciesToTasks = new HashMap<Integer, List<Character>>();
-
-        taskFrequencies.forEach((t, freq) -> {
-            frequenciesToTasks.computeIfAbsent(freq, k -> new ArrayList<>()).add(t);
-        });
-
-        var sortedFrequencies = frequenciesToTasks.keySet().stream()
-                .sorted(Comparator.reverseOrder())
+        var sortedFrequencies = taskFrequencies.entrySet().stream()
+                .map(t -> new TaskFrequency(t.getKey(), t.getValue()))
+                .sorted((a, b) -> -Integer.compare(a.frequency, b.frequency))
                 .toList();
 
         var optimalSchedule = new ArrayList<Character>();
 
-        var nextFrequencyIdx = 0;
-        while (!taskFrequencies.isEmpty()) {
-            var frequency = sortedFrequencies.get(nextFrequencyIdx);
+        var gapsQueue = new ArrayDeque<Integer>();
+        for (var s : sortedFrequencies) {
+            var task = s.task;
+            var frequency = s.frequency;
 
-            var fTasks = frequenciesToTasks.getOrDefault(frequency, List.of());
-
-            // TODO: optimize
-            fTasks.forEach(t -> {
-                optimalSchedule.add(t);
-                var taskRemainingInstances = taskFrequencies.getOrDefault(t, 0);
-                if (taskRemainingInstances > 1) {
-                    taskFrequencies.put(t, taskRemainingInstances - 1);
-                } else {
-                    taskFrequencies.remove(t);
-                }
-            });
-
-            nextFrequencyIdx++;
-            if (nextFrequencyIdx == sortedFrequencies.size()) {
-                nextFrequencyIdx = 0;
-            }
-        }
-
-        var leastIntervals = 0;
-
-        System.out.println("Optimal schedule: " + optimalSchedule);
-
-        for (int i = 0; i < optimalSchedule.size(); i++) {
-            System.out.println("Optimal: " + optimalSchedule);
-            var task = optimalSchedule.get(i);
-            if (task == null) {
-                continue;
-            }
-            var idle = 0;
-            for (int j = 1; j <= n && (i + j) < optimalSchedule.size(); j++) {
-                var nextTask = optimalSchedule.get(i + j);
-                if (task.equals(nextTask)) {
-                    idle = n + 1 - j;
-                    System.out.println("Idle: " + idle + " For: " + task + ", " + nextTask);
-                    for (int k = 0; k < idle; k++) {
-                        optimalSchedule.add(i + j, null);
+            if (optimalSchedule.isEmpty()) {
+                for (int i = 1; i <= frequency; i++) {
+                    optimalSchedule.add(task);
+                    if (i == frequency) {
+                        continue;
                     }
-                    break;
+                    for (int j = 0; j < n; j++) {
+                        optimalSchedule.add(null);
+                    }
+                }
+
+                for (int i = 1; i <= n; i++) {
+                    // Example for frequency = 3 & n = 3.
+                    // Input: A, null, null, A, null, null, A, null, null, A
+                    // Gaps after iteration 1: [1, 4, 7]
+                    // Gaps after iteration 2: [1, 4, 7, 2, 5, 8]
+                    for (int j = 0; j < (frequency - 1); j++) {
+                        var gapIdx = i + (j * (n + 1));
+                        gapsQueue.add(gapIdx);
+                    }
+                }
+            } else {
+                for (int i = 0; i < frequency; i++) {
+                    var gapIdx = gapsQueue.peek();
+                    if (gapIdx == null) {
+                        // no more gaps, insert at the end
+                        optimalSchedule.add(task);
+                    } else {
+                        var allowedGap = true;
+                        int j = gapIdx - 1;
+                        var checks = 0;
+                        while (checks < n && j >= 0) {
+                            var t = optimalSchedule.get(j);
+                            if (t != null && t == task) {
+                                allowedGap = false;
+                                break;
+                            }
+
+                            checks++;
+                            j--;
+                        }
+                        if (allowedGap) {
+                            optimalSchedule.set(gapIdx, task);
+                            gapsQueue.removeFirst();
+                        } else {
+                            optimalSchedule.add(task);
+                        }
+                    }
                 }
             }
-            leastIntervals += (1 + idle);
         }
 
-        return leastIntervals;
+        return optimalSchedule.size();
     }
 
+    private record TaskFrequency(char task, int frequency) {
+    }
 
     record Case(char[] tasks, int n, int intervals) {
 
@@ -83,7 +89,13 @@ public class TaskScheduler {
             return List.of(
                     new Case(new char[]{'A', 'A', 'A', 'B', 'B', 'B'}, 2, 8),
                     new Case(new char[]{'A', 'C', 'A', 'B', 'D', 'B'}, 1, 6),
-                    new Case(new char[]{'A', 'A', 'A', 'B', 'B', 'B'}, 3, 10)
+                    new Case(new char[]{'A', 'A', 'A', 'B', 'B', 'B'}, 3, 10),
+                    new Case(new char[]{'A', 'A', 'A'}, 2, 7),
+                    // is: A, B, C, D, G, A, null, A, null, A
+                    // should be: A, B, A, C, A, D, A, G
+                    new Case(new char[]{'B', 'C', 'D', 'A', 'A', 'A', 'A', 'G'}, 1, 8),
+                    new Case(new char[]{'B', 'A', 'B', 'A', 'C'}, 3, 6),
+                    new Case(new char[]{'A', 'B', 'C', 'D', 'E', 'A', 'B', 'C', 'D', 'E'}, 4, 10)
             );
         }
 
