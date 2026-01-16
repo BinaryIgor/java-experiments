@@ -2,68 +2,80 @@ package com.igor101.leet;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 
 public class TaskScheduler {
 
     static int leastInterval(char[] tasks, int n) {
-        var sortedTasks = new ArrayList<Character>();
+        var taskFrequencies = new HashMap<Character, Integer>();
         for (var t : tasks) {
-            sortedTasks.add(t);
-        }
-        sortedTasks.sort(Comparator.naturalOrder());
-
-        System.out.println(sortedTasks);
-
-        var optimalTasksOrder = new ArrayList<Character>();
-
-        Character lastTask = null;
-        var idx = 0;
-        while (!sortedTasks.isEmpty()) {
-            if (idx >= sortedTasks.size()) {
-                idx = 0;
-            }
-            var nextTask = sortedTasks.get(idx);
-            if (!nextTask.equals(lastTask)) {
-                optimalTasksOrder.add(nextTask);
-                lastTask = nextTask;
-                sortedTasks.remove(idx);
-            } else {
-                idx++;
-            }
+            taskFrequencies.merge(t, 1, Integer::sum);
         }
 
-        System.out.println("Optimal order: " + optimalTasksOrder);
+        var frequenciesToTasks = new HashMap<Integer, List<Character>>();
 
-        var tasksIndexes = new LinkedHashMap<Character, List<Integer>>();
-        for (int i = 0; i < optimalTasksOrder.size(); i++) {
-            var task = optimalTasksOrder.get(i);
-            tasksIndexes.computeIfAbsent(task, $ -> new ArrayList<>()).add(i);
-        }
+        taskFrequencies.forEach((t, freq) -> {
+            frequenciesToTasks.computeIfAbsent(freq, k -> new ArrayList<>()).add(t);
+        });
 
-        int leastIntervals = 0;
-        for (var e : tasksIndexes.entrySet()) {
-            var tIndexes = e.getValue();
-            leastIntervals += 1;
+        var sortedFrequencies = frequenciesToTasks.keySet().stream()
+                .sorted(Comparator.reverseOrder())
+                .toList();
 
-            for (int i = 1; i < tIndexes.size(); i++) {
-                var tIdx = tIndexes.get(i);
-                var previousTIdx = tIndexes.get(i - 1);
-                var sameTasksGap = tIdx - previousTIdx - 1;
-                System.out.println("Gap: " + sameTasksGap + " n: " + n);
-                if (sameTasksGap >= n) {
-                    leastIntervals += 1;
+        var optimalSchedule = new ArrayList<Character>();
+
+        var nextFrequencyIdx = 0;
+        while (!taskFrequencies.isEmpty()) {
+            var frequency = sortedFrequencies.get(nextFrequencyIdx);
+
+            var fTasks = frequenciesToTasks.getOrDefault(frequency, List.of());
+
+            // TODO: optimize
+            fTasks.forEach(t -> {
+                optimalSchedule.add(t);
+                var taskRemainingInstances = taskFrequencies.getOrDefault(t, 0);
+                if (taskRemainingInstances > 1) {
+                    taskFrequencies.put(t, taskRemainingInstances - 1);
                 } else {
-                    var idle = n - sameTasksGap;
-                    System.out.println("Idle required: " + idle);
-                    leastIntervals += (idle + 1);
+                    taskFrequencies.remove(t);
+                }
+            });
+
+            nextFrequencyIdx++;
+            if (nextFrequencyIdx == sortedFrequencies.size()) {
+                nextFrequencyIdx = 0;
+            }
+        }
+
+        var leastIntervals = 0;
+
+        System.out.println("Optimal schedule: " + optimalSchedule);
+
+        for (int i = 0; i < optimalSchedule.size(); i++) {
+            System.out.println("Optimal: " + optimalSchedule);
+            var task = optimalSchedule.get(i);
+            if (task == null) {
+                continue;
+            }
+            var idle = 0;
+            for (int j = 1; j <= n && (i + j) < optimalSchedule.size(); j++) {
+                var nextTask = optimalSchedule.get(i + j);
+                if (task.equals(nextTask)) {
+                    idle = n + 1 - j;
+                    System.out.println("Idle: " + idle + " For: " + task + ", " + nextTask);
+                    for (int k = 0; k < idle; k++) {
+                        optimalSchedule.add(i + j, null);
+                    }
+                    break;
                 }
             }
+            leastIntervals += (1 + idle);
         }
 
         return leastIntervals;
     }
+
 
     record Case(char[] tasks, int n, int intervals) {
 
